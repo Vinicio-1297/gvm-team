@@ -44,7 +44,7 @@ app.post('/guess', (req, res) => {
   res.json({ resultado, mensaje: mensajes[resultado] });
 });
 
-// POST /reset -> genera un nuevo número oculto
+// POST /reset ->  genera un nuevo número oculto
 app.post('/reset', (req, res) => {
   numeroSecreto = generarNumero();
   res.json({ mensaje: 'Juego reiniciado, nuevo número generado' });
