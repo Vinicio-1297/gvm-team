@@ -46,10 +46,21 @@ function Juego() {
   const fallidos = gano ? intentos.length - 1 : intentos.length
 
   return (
-    <div style={{ maxWidth: 400, margin: '40px auto', fontFamily: 'sans-serif' }}>
-      <h1>Adivina el Número</h1>
+    <div style={{
+      maxWidth: '420px',
+      margin: '60px auto',
+      padding: '30px',
+      fontFamily: 'system-ui, -apple-system, sans-serif',
+      background: '#1e1e2f',
+      color: '#15da64',
+      borderRadius: '12px',
+      boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+      textAlign: 'center'
+    }}>
+      <h1 style={{ fontSize: '1.8rem', marginBottom: '10px', color: '#fff' }}>Adivina el Número</h1>
+      <p style={{ color: '#a0aec0', fontSize: '0.9rem', marginBottom: '25px' }}>Adivina un número entre 1 y 100</p>
 
-      <form onSubmit={enviarIntento}>
+      <form onSubmit={enviarIntento} style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '20px' }} >
         <input
           type="number"
           min="1"
@@ -58,24 +69,60 @@ function Juego() {
           onChange={(e) => setNumero(e.target.value)}
           disabled={gano}
           required
+          placeholder="Ej. 50"
+          style={{
+            padding: '10px 14px',
+            borderRadius: '8px',
+            border: '1px solid #15da64',
+            background: '#2d3748',
+            color: '#fff',
+            fontSize: '1rem',
+            width: '100px',
+            outline: 'none'
+          }}
         />
-        <button type="submit" disabled={gano}>Probar</button>
+        <button type="submit"
+          disabled={gano}
+          style={{
+            padding: '10px 20px',
+            borderRadius: '8px',
+            border: 'none',
+            background: gano ? '#4a5568' : '#3182ce',
+            color: '#fff',
+            fontWeight: 'bold',
+            cursor: gano ? 'not-allowed' : 'pointer',
+            transition: 'background 0.2s'
+          }}
+        >Probar</button>
       </form>
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {mensaje && <p><strong>{mensaje}</strong></p>}
-      {gano && <p> ¡Ganaste en {intentos.length} intentos!</p>}
+      {gano && <p style={{ color: '#d43f1a', fontWeight: 'bold', fontSize: '1.1rem' }}> ¡Ganaste en {intentos.length} intentos!</p>}
 
-      <p>Intentos fallidos: {fallidos}</p>
+      <div style={{ background: '#2d3748', padding: '10px', borderRadius: '8px', margin: '20px 0', fontSize: '0.95rem' }}>
+        <span>Intentos fallidos: <strong>{fallidos}</strong></span>
+      </div>
 
       <h3>Historial</h3>
       <ul>
         {intentos.map((n, i) => (
-          <li key={i}>{n}</li>
+          <li key={i} >{n}</li>
         ))}
       </ul>
 
-      <button onClick={reiniciar}>Reiniciar juego</button>
+      <button onClick={reiniciar}
+        style={{
+          marginTop: '25px',
+          width: '100%',
+          padding: '10px',
+          borderRadius: '8px',
+          border: '1px solid #4a5568',
+          background: 'transparent',
+          color: '#a0aec0',
+          cursor: 'pointer',
+          fontWeight: 'bold'
+        }}>Reiniciar juego</button>
     </div>
   )
 }
