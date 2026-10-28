@@ -59,7 +59,7 @@ const TIEMPO_LIMITE_SEG = Number(process.env.TIEMPO_RESERVA_SEG) || 120;
 //Momento (ms) en que se agregó el primer platillo. null = no hay reserva en curso
 let reservaIniciadaEn = null;
 
-//true cuando la reserva se cerró porque se acabó el tiempo
+//true cuando la reserva se cerró porque se acabó el tiempo 
 let reservaExpirada = false;
 
 function segundosRestantes() {
