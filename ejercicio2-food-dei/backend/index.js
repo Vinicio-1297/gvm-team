@@ -53,6 +53,41 @@ let reserva = [];
 
 let reservaConfirmada = false;
 
+//Límite de tiempo de la reserva (segundos). Se puede cambiar con la variable TIEMPO_RESERVA_SEG
+const TIEMPO_LIMITE_SEG = Number(process.env.TIEMPO_RESERVA_SEG) || 120;
+
+//Momento (ms) en que se agregó el primer platillo. null = no hay reserva en curso
+let reservaIniciadaEn = null;
+
+//true cuando la reserva se cerró porque se acabó el tiempo
+let reservaExpirada = false;
+
+function segundosRestantes() {
+    if (reservaIniciadaEn === null || reservaConfirmada) {
+        return null;
+    }
+
+    const transcurridos = Math.floor((Date.now() - reservaIniciadaEn) / 1000);
+    return Math.max(TIEMPO_LIMITE_SEG - transcurridos, 0);
+}
+
+//Devuelve al menú las porciones que estaban apartadas en la reserva
+function devolverStock() {
+    reserva.forEach(item => {
+        const alimento = menu.find(a => a.id === item.id);
+
+        if (alimento) {
+            alimento.stock += item.cantidad;
+        }
+    });
+}
+
+function limpiarReserva() {
+    reserva = [];
+    reservaConfirmada = false;
+    reservaIniciadaEn = null;
+}
+
 function calcularTotal() {
     return reserva.reduce((total, item) => {
         const alimento = menu.find(a => a.id === item.id);
@@ -73,13 +108,26 @@ app.get("/api/menu", (req, res) => {
 
 //GET /api/reserva
 
-app.get("/api/reserva", (req, res) => {
+app.get("/api/reserva", (req, res, next) => {
+    if (segundosRestantes() === 0) {
+        devolverStock();
+        limpiarReserva();
+        reservaExpirada = true;
+    }
+
+    next();
+
+}, (req, res) => {
+
     res.json({
         saldo: saldo,
         itemsReservados: reserva,
         total: calcularTotal(),
-        confirmada: reservaConfirmada
+        confirmada: reservaConfirmada,
+        segundosRestantes: segundosRestantes(),
+        expirada: reservaExpirada
     });
+
 });
 
 //POST /api/reserva/agregar
@@ -137,6 +185,11 @@ app.post("/api/reserva/agregar", (req, res) => {
     }
 
     alimento.stock -= cantidad;
+
+    if (reservaIniciadaEn === null) {
+        reservaIniciadaEn = Date.now();
+        reservaExpirada = false;
+    }
 
     if (itemExistente) {
         itemExistente.cantidad = nuevaCantidad;
@@ -258,6 +311,10 @@ app.delete("/api/reserva/eliminar/:id", (req, res) => {
 
     reserva.splice(indice, 1);
 
+    if (reserva.length === 0) {
+        reservaIniciadaEn = null;
+    }
+
     res.json({
         mensaje: "Alimento eliminado de la reserva",
         itemsReservados: reserva,
@@ -302,6 +359,26 @@ app.post("/api/reserva/confirmar", (req, res) => {
         saldo: saldo,
         itemsReservados: reserva,
         total: total,
+        confirmada: reservaConfirmada
+    });
+});
+
+//POST /api/reserva/reiniciar
+
+app.post("/api/reserva/reiniciar", (req, res) => {
+    //Si aún no estaba confirmada, las porciones apartadas vuelven al menú
+    if (!reservaConfirmada) {
+        devolverStock();
+    }
+
+    limpiarReserva();
+    reservaExpirada = false;
+
+    res.json({
+        mensaje: "Reserva reiniciada",
+        saldo: saldo,
+        itemsReservados: reserva,
+        total: calcularTotal(),
         confirmada: reservaConfirmada
     });
 });
